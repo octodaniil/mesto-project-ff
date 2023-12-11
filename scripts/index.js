@@ -4,19 +4,19 @@ const cardsContainer = document.querySelector('.places__list');
 function createCards(cardData, deleteCard) {
   const cardElement = cardTemplate.querySelector('.card').cloneNode(true);
 
-  cardElement.querySelector('.card__image').src = cardData.link;
-  cardElement.querySelector('.card__image').alt = 'Картинка пейзажа';
+  const cardImage = cardElement.querySelector('.card__image')
+  cardImage.src = cardData.link;
+  cardImage.alt = cardData.name;
   cardElement.querySelector('.card__title').textContent = cardData.name;
 
   const deleteButton = cardElement.querySelector('.card__delete-button');
-  deleteButton.addEventListener('click', deleteCard);
+  deleteButton.addEventListener('click', () => deleteCard(cardElement));
 
   return cardElement;
 }
 
-function deleteCard(event) {
-  const delCard = event.target.closest('.card');
-  delCard.remove();
+function deleteCard(cardElement) {
+  cardElement.remove();
 }
 
 initialCards.forEach((cardData) => {
