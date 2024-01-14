@@ -1,9 +1,7 @@
 import './pages/index.css';
-import {openModal, closeModal} from './components/modal.js';
-import {createCards, initialCards, deleteCard, likeCard} from './components/cards.js';
-export {cardTemplate};
+import { openModal, closeModal } from './components/modal.js';
+import { createCard, initialCards, deleteCard, likeCard } from './components/cards.js';
 
-const cardTemplate = document.querySelector('#card-template').content;
 const cardsContainer = document.querySelector('.places__list');
 
 const profileEdit = document.querySelector('.profile__edit-button');
@@ -15,8 +13,8 @@ const editPopup = document.querySelector('.popup_type_edit');
 const addPopup = document.querySelector('.popup_type_new-card');
 const imagePopup = document.querySelector('.popup_type_image');
 
-let profileTitle = document.querySelector('.profile__title');
-let profileDescription = document.querySelector('.profile__description');
+const profileTitle = document.querySelector('.profile__title');
+const profileDescription = document.querySelector('.profile__description');
 
 const editForm = document.forms.editProfile;
 const editFormInputName = editForm.elements.name;
@@ -27,23 +25,24 @@ const addFormInputName = addForm.elements.placeName;
 const addFormInputLink = addForm.elements.link;
 
 const imageInPopup = document.querySelector('.popup__image');
-let imagePopupCaption = document.querySelector('.popup__caption');
+const imagePopupCaption = document.querySelector('.popup__caption');
 
 function showImage(e) {
   imageInPopup.src = e.src;
   imageInPopup.alt = e.alt;
   imagePopupCaption.textContent = e.alt;
+  openModal(imagePopup);
 }
 
 initialCards.forEach((cardData) => {
-  const cardElement = createCards(cardData, deleteCard, likeCard, showImage);
+  const cardElement = createCard(cardData, deleteCard, likeCard, showImage);
   cardsContainer.append(cardElement);
 });
 
 allPopups.forEach((popup) => {
   popup.addEventListener('click', (evt) => {
-    let evtTarget = evt.target.classList;
-    if(evtTarget.contains('popup__close') || evtTarget.contains('popup')) {
+    const evtTarget = evt.target.classList;
+    if (evtTarget.contains('popup__close') || evtTarget.contains('popup')) {
       closeModal(popup);
     }
   })
@@ -58,8 +57,8 @@ profileEdit.addEventListener('click', () => {
 function handleEditFormSubmit(evt) {
   evt.preventDefault();
 
-  let nameValue = editFormInputName.value;
-  let descriptionValue = editFormInputDescription.value;
+  const nameValue = editFormInputName.value;
+  const descriptionValue = editFormInputDescription.value;
 
   profileTitle.textContent = nameValue;
   profileDescription.textContent = descriptionValue;
@@ -76,10 +75,10 @@ profileAdd.addEventListener('click', () => {
 function handleAddFormSubmit(evt) {
   evt.preventDefault();
 
-  let nameValue = addFormInputName.value;
-  let linkValue = addFormInputLink.value;
+  const nameValue = addFormInputName.value;
+  const linkValue = addFormInputLink.value;
 
-  const cardElement = createCards({name: nameValue, link: linkValue}, deleteCard, likeCard, showImage);
+  const cardElement = createCard({ name: nameValue, link: linkValue }, deleteCard, likeCard, showImage);
   cardsContainer.prepend(cardElement);
 
   addForm.reset();
@@ -87,12 +86,6 @@ function handleAddFormSubmit(evt) {
 }
 
 addForm.addEventListener('submit', handleAddFormSubmit);
-
-cardList.addEventListener('click', (evt) => {
-  if(evt.target.classList.contains('card__image')) {
-    openModal(imagePopup);
-  }
-})
 
 
 
