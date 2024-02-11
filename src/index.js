@@ -1,14 +1,13 @@
 import './pages/index.css';
-import { openModal, closeModal } from './components/modal.js';
-import { createCard, deleteCard, likeCard } from './components/cards.js';
+import { openModal, closeModal, handleClosePopupByClick } from './components/modal.js';
+import { createCard, deleteCard, likeCard } from './components/card.js';
 import { enableValidation, clearValidation, validationConfig } from './components/validation.js';
-import { getInitialCards, updateProfile, addCard, myID, updateProfileImg, getInitialProfile } from './components/api.js';
+import { getInitialCards, updateProfile, addCard, updateProfileImg, getProfile } from './components/api.js';
 
 const cardsContainer = document.querySelector('.places__list');
 
 const profileEdit = document.querySelector('.profile__edit-button');
 const profileAdd = document.querySelector('.profile__add-button');
-const cardList = document.querySelector('.places__list');
 
 const allPopups = document.querySelectorAll('.popup');
 const editPopup = document.querySelector('.popup_type_edit');
@@ -36,23 +35,26 @@ const imagePopupCaption = document.querySelector('.popup__caption');
 
 const avatar = document.querySelector('.profile__edit-mode');
 
+export let userId;
+
 // Показ картинки карточки
-function showImage(e) {
-  imageInPopup.src = e.src;
-  imageInPopup.alt = e.alt;
-  imagePopupCaption.textContent = e.alt;
+function showImage(imageElement) {
+  imageInPopup.src = imageElement.src;
+  imageInPopup.alt = imageElement.alt;
+  imagePopupCaption.textContent = imageElement.alt;
   openModal(imagePopup);
 }
 
 // Получение карточек и данных профиля
-Promise.all([getInitialProfile(), getInitialCards()])
+Promise.all([getProfile(), getInitialCards()])
   .then(([profileData, cardDataList]) => {
     profileTitle.textContent = profileData.name;
     profileDescription.textContent = profileData.about
     profileImage.style.backgroundImage = `url('${profileData.avatar}')`;
+    userId = profileData._id
 
     cardDataList.forEach((cardData) => {
-      const cardElement = createCard(cardData, deleteCard, likeCard, showImage);
+      const cardElement = createCard(cardData, deleteCard, likeCard, showImage, userId);
       cardsContainer.append(cardElement);
     })
   })
@@ -63,10 +65,7 @@ Promise.all([getInitialProfile(), getInitialCards()])
 // Слушатель события на закрытие карточек
 allPopups.forEach((popup) => {
   popup.addEventListener('click', (evt) => {
-    const evtTarget = evt.target.classList;
-    if (evtTarget.contains('popup__close') || evtTarget.contains('popup')) {
-      closeModal(popup);
-    }
+    handleClosePopupByClick(evt, popup);
   })
 });
 
@@ -88,6 +87,7 @@ function handleEditFormSubmit(evt) {
       profileTitle.textContent = result.name;
       profileDescription.textContent = result.about
       profileImage.style.backgroundImage = `url('${result.avatar}')`;
+      closeModal(editPopup);
     })
     .catch(err => {
       console.log(err);
@@ -95,16 +95,12 @@ function handleEditFormSubmit(evt) {
     .finally(() => {
       renderLoading(false, editForm);
     })
-
-  closeModal(editPopup);
 }
 
 editForm.addEventListener('submit', handleEditFormSubmit);
 
 // Открытие формы добавления карточки
 profileAdd.addEventListener('click', () => {
-  addForm.reset();
-  clearValidation(addForm, validationConfig)
   openModal(addPopup);
 })
 
@@ -117,9 +113,12 @@ function handleAddFormSubmit(evt) {
   const linkValue = addFormInputLink.value;
 
   addCard(nameValue, linkValue)
-    .then(() => {
-      const cardElement = createCard({ name: nameValue, link: linkValue, likes: [], owner: { _id: myID } }, deleteCard, likeCard, showImage);
+    .then((result) => {
+      const cardElement = createCard(result, deleteCard, likeCard, showImage, userId);
       cardsContainer.prepend(cardElement);
+      addForm.reset();
+      closeModal(addPopup);
+      clearValidation(addForm, validationConfig);
     })
     .catch(err => {
       console.log(err);
@@ -127,10 +126,6 @@ function handleAddFormSubmit(evt) {
     .finally(() => {
       renderLoading(false, addForm);
     })
-
-  addForm.reset();
-  closeModal(addPopup);
-  clearValidation(addForm, validationConfig);
 }
 
 addForm.addEventListener('submit', handleAddFormSubmit);
@@ -159,7 +154,6 @@ function handleAvatarFormSubmit(evt) {
     .finally(() => {
       renderLoading(false, avatarForm);
     })
-  avatarForm.reset();
   closeModal(avatarPopup)
 }
 

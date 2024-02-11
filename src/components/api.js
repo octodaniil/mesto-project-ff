@@ -6,8 +6,6 @@ const config = {
   }
 }
 
-const myID = '09aa0e3c4725739bc13bab28';
-
 function getRes(res) {
   if (res.ok) {
     return res.json();
@@ -23,7 +21,7 @@ const getInitialCards = () => {
     .then(getRes);
 }
 
-const getInitialProfile = () => {
+const getProfile = () => {
   return fetch(`${config.baseUrl}/users/me`, {
     headers: config.headers
   })
@@ -89,4 +87,4 @@ const updateProfileImg = (newAvatar) => {
     .then(getRes);
 }
 
-export { myID, getInitialCards, getInitialProfile, updateProfile, addCard, deleteCardServer, putLike, deleteLike, updateProfileImg };
+export { getInitialCards, getProfile, updateProfile, addCard, deleteCardServer, putLike, deleteLike, updateProfileImg };
